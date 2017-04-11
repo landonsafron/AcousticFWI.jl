@@ -39,7 +39,7 @@ function HelmholtzSolver{T<:AbstractFloat}(isz::Array{Int,1},isx::Array{Int,1},o
     _,iwmax = findmin(abs(fmax-faxis))
     U = complex(zeros(nf,nz,nx))
     for iw = iwmin:iwmax
-        w = 2*waxis[iw]
+        w = waxis[iw]
         H = L + w^2*D
         s = Source(isz,isx,ot,WAV,waxis,w,nz,nx,ext)
         U_tmp = H\s
