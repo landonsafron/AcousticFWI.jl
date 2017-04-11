@@ -9,7 +9,7 @@ function SlownessSquared{T<:AbstractFloat}(vp::Array{T,2},nz::Int,nx::Int,ext::I
 #             nx        - Number of grid points in x-direction INCLUDING the absorbing boundary region
 #             ext       - Thickness (number of grid points) of absorbing boundary region
 #
-# OUTPUTS:    S         - Diagonal matrix containing modeling parameters
+# OUTPUTS:    S         - Diagonal matrix containing the slowness-squared for each point within the model and boundary region
 
     S = zeros(T,nz,nx)
     S[ext+1:end-ext,ext+1:end-ext] = 1./(vp.^2)
