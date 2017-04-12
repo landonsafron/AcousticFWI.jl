@@ -1,9 +1,11 @@
 using AcousticFWI,Seismic,SeismicImaging,PyPlot
 
+#function main()
+
     nz = 150
     nx = 250
-    nt = 500
-    nf = 1024
+    nt = 512
+    nf = 512
     dz = 2.
     dx = 2.
     dt = 0.002
@@ -12,7 +14,7 @@ using AcousticFWI,Seismic,SeismicImaging,PyPlot
     fmax = 120.
     ext = 50
     atten_max = 2.
-    alpha = 0.01
+    alpha = 1.
     maxiter = 2
 
     vp = 2000.*ones(nz,nx)
@@ -28,7 +30,7 @@ using AcousticFWI,Seismic,SeismicImaging,PyPlot
     u = HelmholtzSolver(isz,isx,ot,vp,wav,fmin,fmax,nf,nt,dz,dx,dt,ext,atten_max)
     d = u[:,3,igx]
 
-    vp0 = smooth2d(vp,50,50)
+    vp0 = smooth2d(vp,30,30)
     vp_est = FWI(vp0,d,wav,isz,isx,igz,igx,ot,fmin,fmax,nf,dz,dx,dt,ext,atten_max,maxiter)
 
     subplot(3,3,1) ; SeisPlot(u[20,:,:],pclip=100,cmap="gray",fignum=1)
@@ -48,3 +50,5 @@ using AcousticFWI,Seismic,SeismicImaging,PyPlot
               ; subplot(311) ; imshow(vp,vmin=vmin,vmax=vmax,cmap="YlOrBr",extent=[0.,(nx-1)*dx,(nz-1)*dz,0.])
               ; subplot(312) ; imshow(vp0,vmin=vmin,vmax=vmax,cmap="YlOrBr",extent=[0.,(nx-1)*dx,(nz-1)*dz,0.])
               ; subplot(313) ; imshow(vp_est,vmin=vmin,vmax=vmax,cmap="YlOrBr",extent=[0.,(nx-1)*dx,(nz-1)*dz,0.])
+
+#end

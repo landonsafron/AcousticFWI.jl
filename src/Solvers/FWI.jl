@@ -36,7 +36,7 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,2},wav::Array{T,1},isz
     M = SlownessSquared(vp0,nz,nx,ext)
     R = Restriction(nz,nx,ext,igz,igx)
 
-    D = fft([d ; zeros(nf-size(d,1),size(d,2))])
+    D = fft([d ; zeros(nf-size(d,1),size(d,2))],1)
     WAV = fft([wav;zeros(nf-length(wav))])
     fs = 1/dt
     df = fs/nf
@@ -56,12 +56,12 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,2},wav::Array{T,1},isz
             U = H\s
             r = R*U - D[iw,:]
             grad = -real(MassMatrix'*(conj(H)\(R'*r)))
-            M = M + alpha*spdiagm(grad)
+            M = M - alpha*spdiagm(grad)
         end
         iter += 1
     end
 
-    vp = sqrt(1./M)
+    vp = reshape(sqrt(1./diag(M)),nz,nx)[ext+1:end-ext,ext+1:end-ext]
 
     return vp
 
