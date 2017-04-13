@@ -14,23 +14,23 @@ using AcousticFWI,Seismic,SeismicImaging,PyPlot
     fmax = 120.
     ext = 50
     atten_max = 2.
-    alpha = 1.
+    alpha = 1.0e-9
     maxiter = 2
 
     vp = 2000.*ones(nz,nx)
     vp[101:end,:] = 3000.
 
-    isz = [3,3]
-    isx = [81,167]
+    ot = [0.,0.,0.,0.]
+    isz = [3,3,3,3]
+    isx = [50,100,150,200]
     igz = 3*ones(Int,nx)
     igx = [1:nx;]
-    ot = [0.,30*dt]
 
     wav = Ricker(f0=f0,dt=dt)
     u = HelmholtzSolver(isz,isx,ot,vp,wav,fmin,fmax,nf,nt,dz,dx,dt,ext,atten_max)
     d = u[:,3,igx]
 
-    vp0 = smooth2d(vp,30,30)
+    vp0 = smooth2d(vp,20,20)
     vp_est = FWI(vp0,d,wav,isz,isx,igz,igx,ot,fmin,fmax,nf,dz,dx,dt,ext,atten_max,maxiter)
 
     subplot(3,3,1) ; SeisPlot(u[20,:,:],pclip=100,cmap="gray",fignum=1)
