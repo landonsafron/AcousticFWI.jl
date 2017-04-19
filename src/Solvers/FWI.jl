@@ -46,18 +46,16 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,2},wav::Array{T,1},isz
     _,iwmin = findmin(abs(fmin-faxis))
     _,iwmax = findmin(abs(fmax-faxis))
 
-    iter = 1
-    while iter<=maxiter #&& (NOT CONVERGED)
-        for iw = iwmin:iwmax
-            w = waxis[iw]
-            s = Source(isz,isx,ot,WAV,waxis,w,nz,nx,ext)
+    for iw = iwmin:iwmax
+        w = waxis[iw]
+        s = Source(isz,isx,ot,WAV,waxis,w,nz,nx,ext)
+        for iter = 1:maxiter
             H = L + w^2*M*A
             U = H\s
             r = R*U - D[iw,:]
             grad = -real(w^2*A'*spdiagm(U)'*(H'\(R'*r)))
             M = M - alpha*spdiagm(grad)
         end
-        iter += 1
     end
 
     vp = reshape(sqrt(1./diag(M)),nz,nx)[ext+1:end-ext,ext+1:end-ext]
