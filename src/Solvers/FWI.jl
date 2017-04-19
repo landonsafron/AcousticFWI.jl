@@ -55,6 +55,8 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,2},wav::Array{T,1},isz
             r = R*U - D[iw,:]
             grad = -real(w^2*A'*spdiagm(U)'*(H'\(R'*r)))
             M = M - alpha*spdiagm(grad)
+
+            # rather than estimating 'grad', i should estimate 'dM' by solving a conjugate gradient problem::   J = ||S*dM - r||_2^2
         end
     end
 

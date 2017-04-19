@@ -4,25 +4,25 @@ using AcousticFWI,Seismic,SeismicImaging,PyPlot
 
     nz = 150
     nx = 250
-    nt = 512
-    nf = 512
-    dz = 2.
-    dx = 2.
+    nt = 1024
+    nf = 1024
+    dz = 5.
+    dx = 5.
     dt = 0.002
-    f0 = 45.
-    fmin = 2. 
-    fmax = 120.
+    f0 = 10.
+    fmin = 0.5 
+    fmax = 30.
     ext = 50
-    atten_max = 2.
+    atten_max = 2.5
     alpha = 1.0e-8
-    maxiter = 2
+    maxiter = 10
 
     vp = 2000.*ones(nz,nx)
     vp[101:end,:] = 3000.
 
-    ot = [0.,0.,0.,0.]
-    isz = [3,3,3,3]
-    isx = [50,100,150,200]
+    ot = [0.]
+    isz = [3]
+    isx = [100]
     igz = 3*ones(Int,nx)
     igx = [1:nx;]
 
