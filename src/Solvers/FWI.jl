@@ -51,11 +51,10 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,2},wav::Array{T,1},isz
         for iw = iwmin:iwmax
             w = waxis[iw]
             s = Source(isz,isx,ot,WAV,waxis,w,nz,nx,ext)
-            MassMatrix = w^2*M*A
-            H = L + MassMatrix
+            H = L + w^2*M*A
             U = H\s
             r = R*U - D[iw,:]
-            grad = -real(MassMatrix'*(conj(H)\(R'*r)))
+            grad = -real(w^2*A'*spdiagm(U)'*(H'\(R'*r)))
             M = M - alpha*spdiagm(grad)
         end
         iter += 1

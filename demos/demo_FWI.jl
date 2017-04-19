@@ -14,7 +14,7 @@ using AcousticFWI,Seismic,SeismicImaging,PyPlot
     fmax = 120.
     ext = 50
     atten_max = 2.
-    alpha = 1.0e-9
+    alpha = 1.0e-8
     maxiter = 2
 
     vp = 2000.*ones(nz,nx)
