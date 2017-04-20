@@ -3,7 +3,7 @@ function Sensitivity()
 # This function is the forward and adjoint sensitivity/jacobian operator
 # for multiple shots.
 
-    for ishot = 1:ns
+    for ishot = 1:ns # DO THE OPERATION 1 SHOT AT A TIME
         SOMETHING = Sensitivity()
     end
 
