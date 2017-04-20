@@ -1,5 +1,8 @@
 module AcousticFWI
 
+# Julia modules
+using Seismic
+
 # Operators
 export Attenuation,
 Laplacian,
