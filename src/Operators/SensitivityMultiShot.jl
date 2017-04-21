@@ -1,10 +1,4 @@
-    ####### NEED TO TAKE THE REAL PART OF OUT???????????????
-
-
-    #### HOW TO INPUT SPARSE MATRICES INTO A FUNCTION WITH PREDEFINED TYPES???????
-
-#=
-function Sensitivity{T<:Complex}()
+function SensitivityMultiShot{T1<:Complex,T2<:Int,T3<:AbstractFloat}(IN::Array{T1,1},adj::Bool;R::SparseMatrixCSC{T2,T2}=sparse(ones(T2,1,1)),H::Base.SparseArrays.UMFPACK.UmfpackLU{T1,T2}=lufact(sparse(ones(T1,1,1))),U::Array{T1,2}=im*ones(T1,1,1),A::SparseMatrixCSC{T1,T2}=sparse(ones(T1,1,1)),w::T3=1.)
 
 # This function is the forward and adjoint sensitivity/jacobian operator
 # for multiple shots.
@@ -15,6 +9,7 @@ function Sensitivity{T<:Complex}()
 #             H         - LU factorization of the Helmholtz operator
 #             U         - Predicted forward-propagated wavefield for each shot (stored as a matrix with dimensions nz*nx,ns)
 #             A         - Diagonal matrix containing the complex-valued attenuation coefficients
+#             w         - Angular frequency
 #
 # OUTPUTS:    OUT       - Model perturbation for adjoint; Data residuals for forward
 
@@ -23,16 +18,16 @@ function Sensitivity{T<:Complex}()
     n = size(A,2)
 
     if adj==false
-        OUT = zeros(T,ng*ns)
+        OUT = zeros(T1,ng*ns)
         for ishot = 1:ns
-            OUT[(ishot-1)*ng+1:ishot*ng] = Sensitivity(IN,adj,R=R,H=H,U=U[:,ishot],A=A)
+            OUT[(ishot-1)*ng+1:ishot*ng] = Sensitivity1Shot(IN,adj,R=R,H=H,U=U[:,ishot],A=A,w=w)
         end
     end
 
     if adj==true
-        OUT = zeros(T,n)
+        OUT = zeros(T1,n)
         for ishot = 1:ns
-            OUT += Sensitivity(IN[(ishot-1)*ng+1:ishot*ng],adj,R=R,H=H,U=U[:,ishot],A=A)
+            OUT += Sensitivity1Shot(IN[(ishot-1)*ng+1:ishot*ng],adj,R=R,H=H,U=U[:,ishot],A=A,w=w)
         end
     end
 
@@ -43,7 +38,8 @@ end
 
 
 
-function Sensitivity{T<:Complex}(IN::Array{T,1},adj::Bool;R::Array{Int,2},H,U::Array{T,1},A::Array{T,1})
+
+function Sensitivity1Shot{T1<:Complex,T2<:Int,T3<:AbstractFloat}(IN::Array{T1,1},adj::Bool;R::SparseMatrixCSC{T2,T2}=sparse(ones(T2,1,1)),H::Base.SparseArrays.UMFPACK.UmfpackLU{T1,T2}=lufact(sparse(ones(T1,1,1))),U::Array{T1,1}=im*ones(T1,1),A::SparseMatrixCSC{T1,T2}=sparse(ones(T1,1,1)),w::T3=1.)
 
 # This function is the forward and adjoint sensitivity/jacobian operator
 # for a single shot.
@@ -54,6 +50,7 @@ function Sensitivity{T<:Complex}(IN::Array{T,1},adj::Bool;R::Array{Int,2},H,U::A
 #             H         - LU factorization of the Helmholtz operator
 #             U         - Predicted forward-propagated wavefield
 #             A         - Diagonal matrix containing the complex-valued attenuation coefficients
+#             w         - Angular frequency
 #
 # OUTPUTS:    OUT       - Model perturbation for adjoint; Data residual for forward
 
@@ -68,4 +65,3 @@ function Sensitivity{T<:Complex}(IN::Array{T,1},adj::Bool;R::Array{Int,2},H,U::A
     return OUT
 
 end
-=#

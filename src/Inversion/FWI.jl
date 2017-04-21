@@ -1,4 +1,4 @@
-function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz::Array{Int,1},isx::Array{Int,1},igz::Array{Int,1},igx::Array{Int,1},ot::Array{T,1},fmin::T,fmax::T,nf::Int,dz::T,dx::T,dt::T,ext::Int=50,atten_max::T=2.,alpha=1,GNiter=5,CGiter=20,CGtol=1.0e-15)
+function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz::Array{Int,1},isx::Array{Int,1},igz::Array{Int,1},igx::Array{Int,1},ot::Array{T,1},fmin::T,fmax::T,nf::Int,dz::T,dx::T,dt::T,ext::Int=50,atten_max::T=2.,GNiter=5,CGiter=20,CGtol=1.0e-15)
 
 # This function performs frequency-domain acoustic full waveform inversion
 # using the Gauss-Newton method. A multi-scale approach is adopted by 
@@ -26,7 +26,6 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
 #             dt        - Sampling interval (time step)
 #             ext       - Thickness (number of grid points) of absorbing boundary region
 #             atten_max - Maximum complex amplitude in the attenuating boundary layer
-#             alpha     - Step size in gradient descent method; how far to step along the gradient
 #             GNiter    - Maximum number of iterations for the Gauss-Newton method
 #             CGiter    - Maximum number of iterations for conjugate gradients
 #             CGtol     - Convergence tolerance for conjugate gradients
@@ -54,24 +53,26 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
     _,iwmin = findmin(abs(fmin-faxis))
     _,iwmax = findmin(abs(fmax-faxis))
 
-    ###########param = Dict(:R=>R,: )
+    param = Dict(:R=>R,:A=>A)
 
-### NEED TO IMPLEMENT PARALLELISM OVER SHOTS WHENEVER LOOPING OVER SHOTS... INCLUDING IN THE SENSITIVITY FUNCTION
     for iw = iwmin:iwmax
         w = waxis[iw]
         s = zeros(eltype(D),nz*nx,ns)
         for ishot = 1:ns
-            s[:,ishot] = Source(isz,isx,ot,WAV,waxis,w,nz,nx,ext)
+            s[:,ishot] = Source(isz[ishot],isx[ishot],ot[ishot],WAV,waxis,w,nz,nx,ext)
         end
         for iter = 1:GNiter
             H = lufact(L + w^2*M*A)
-            U = zeros(eltype(D),nz,nx,ns)
+            U = zeros(eltype(D),nz*nx,ns)
             r = zeros(eltype(D),ng*ns)
             for ishot = 1:ns
-                U[:,:,ishot] = H\s[:,ishot]
-                r[(ishot-1)*ng+1:ishot*ng] = R*U[:,:,ishot] - D[iw,:,ishot]
+                U[:,ishot] = H\s[:,ishot]
+                r[(ishot-1)*ng+1:ishot*ng] = R*U[:,ishot] - D[iw,:,ishot]
             end
-            dM = ConjugateGradients(r,[Sensitivity],param,Niter=CGiter,mu=0.,tol=CGtol)
+            param[:H] = H
+            param[:U] = U
+            param[:w] = w
+            dM = ConjugateGradients(r,[SensitivityMultiShot],param,Niter=CGiter,mu=0.,tol=CGtol)
             M -= dM # or should it be += ....?????
         end
     end
@@ -81,3 +82,7 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
     return vp
 
 end
+
+
+#g = real(SensitivityMultiShot(r,true;param...))
+#imshow(reshape(g,nz,nx))

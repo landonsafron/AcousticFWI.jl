@@ -18,11 +18,11 @@ export Attenuation,
 Laplacian,
 MassMatrix,
 Restriction,
-Sensitivity
+SensitivityMultiShot
 include("Operators/Attenuation.jl")
 include("Operators/Laplacian.jl")
 include("Operators/MassMatrix.jl")
 include("Operators/Restriction.jl")
-include("Operators/Sensitivity.jl")
+include("Operators/SensitivityMultiShot.jl")
 
 end

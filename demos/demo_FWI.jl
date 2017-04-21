@@ -1,47 +1,53 @@
-using AcousticFWI,Seismic,SeismicImaging,PyPlot
+using AcousticFWI,Seismic,PyPlot
 
 #function main()
 
+    ns = 10
+    ng = 250
     nz = 150
     nx = 250
     nt = 1024
     nf = 1024
-    dz = 5.
-    dx = 5.
+    dz = 0.01
+    dx = 0.01
     dt = 0.002
     f0 = 10.
     fmin = 0.5 
     fmax = 30.
     ext = 50
     atten_max = 2.5
-    alpha = 1.0e-8
-    maxiter = 10
+    GNiter = 10
+    CGiter = 20
 
-    vp = 2000.*ones(nz,nx)
-    vp[101:end,:] = 3000.
+    vp = 2.1*ones(nz,nx)
+    vp[61:100,:] = 3.0
+    vp[101:end,:] = 2.7
 
-    ot = [0.]
-    isz = [3]
-    isx = [100]
-    igz = 3*ones(Int,nx)
-    igx = [1:nx;]
+    ot = zeros(ns)
+    isz = 3*ones(Int,ns)
+    isx = round(Int,collect(linspace(2,nx-1,ns)))
+    igz = 3*ones(Int,ng)
+    igx = round(Int,collect(linspace(1,nx,ng)))
 
     wav = Ricker(f0=f0,dt=dt)
-    u = Helmholtz(isz,isx,ot,vp,wav,fmin,fmax,nf,nt,dz,dx,dt,ext,atten_max)
-    d = u[:,3,igx]
+    d = zeros(nt,ng,ns)
+    for ishot = 1:ns
+        u = Helmholtz(isz[ishot],isx[ishot],ot[ishot],vp,wav,fmin,fmax,nf,nt,dz,dx,dt,ext,atten_max)
+        d[:,:,ishot] = u[:,3,igx]
+    end
 
-    vp0 = smooth2d(vp,20,20)
-    vp_est = FWI(vp0,d,wav,isz,isx,igz,igx,ot,fmin,fmax,nf,dz,dx,dt,ext,atten_max,maxiter)
+    vp0 = 2.5*ones(vp)
+    vp_est = FWI(vp0,d,wav,isz,isx,igz,igx,ot,fmin,fmax,nf,dz,dx,dt,ext,atten_max,GCiter,CGiter)
 
-    subplot(3,3,1) ; SeisPlot(u[40,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,2) ; SeisPlot(u[80,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,3) ; SeisPlot(u[120,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,4) ; SeisPlot(u[160,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,5) ; SeisPlot(u[200,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,6) ; SeisPlot(u[240,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,7) ; SeisPlot(u[280,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,8) ; SeisPlot(u[320,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,9) ; SeisPlot(u[360,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,1) ; SeisPlot(u[10,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,2) ; SeisPlot(u[70,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,3) ; SeisPlot(u[130,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,4) ; SeisPlot(u[190,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,5) ; SeisPlot(u[250,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,6) ; SeisPlot(u[310,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,7) ; SeisPlot(u[370,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,8) ; SeisPlot(u[430,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,9) ; SeisPlot(u[490,:,:],pclip=100,cmap="gray",fignum=1)
 
     SeisPlot(d,pclip=98,cmap="gray",fignum=2)
 
