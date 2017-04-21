@@ -27,7 +27,7 @@ function main()
     igx = [1:nx;]
     ot = [0.,30*dt]
 
-    u = HelmholtzSolver(isz,isx,ot,vp,wav,fmin,fmax,nf,nt,dz,dx,dt,ext,atten_max)
+    u = Helmholtz(isz,isx,ot,vp,wav,fmin,fmax,nf,nt,dz,dx,dt,ext,atten_max)
     d = u[:,3,igx]
 
     subplot(3,3,1) ; SeisPlot(u[20,:,:],pclip=100,cmap="gray",fignum=1)
