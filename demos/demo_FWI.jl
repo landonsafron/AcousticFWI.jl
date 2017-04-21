@@ -27,21 +27,21 @@ using AcousticFWI,Seismic,SeismicImaging,PyPlot
     igx = [1:nx;]
 
     wav = Ricker(f0=f0,dt=dt)
-    u = HelmholtzSolver(isz,isx,ot,vp,wav,fmin,fmax,nf,nt,dz,dx,dt,ext,atten_max)
+    u = Helmholtz(isz,isx,ot,vp,wav,fmin,fmax,nf,nt,dz,dx,dt,ext,atten_max)
     d = u[:,3,igx]
 
     vp0 = smooth2d(vp,20,20)
     vp_est = FWI(vp0,d,wav,isz,isx,igz,igx,ot,fmin,fmax,nf,dz,dx,dt,ext,atten_max,maxiter)
 
-    subplot(3,3,1) ; SeisPlot(u[20,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,2) ; SeisPlot(u[40,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,3) ; SeisPlot(u[60,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,4) ; SeisPlot(u[80,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,5) ; SeisPlot(u[100,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,6) ; SeisPlot(u[120,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,7) ; SeisPlot(u[140,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,8) ; SeisPlot(u[160,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,9) ; SeisPlot(u[180,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,1) ; SeisPlot(u[40,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,2) ; SeisPlot(u[80,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,3) ; SeisPlot(u[120,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,4) ; SeisPlot(u[160,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,5) ; SeisPlot(u[200,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,6) ; SeisPlot(u[240,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,7) ; SeisPlot(u[280,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,8) ; SeisPlot(u[320,:,:],pclip=100,cmap="gray",fignum=1)
+    subplot(3,3,9) ; SeisPlot(u[360,:,:],pclip=100,cmap="gray",fignum=1)
 
     SeisPlot(d,pclip=98,cmap="gray",fignum=2)
 

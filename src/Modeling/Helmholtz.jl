@@ -1,4 +1,4 @@
-function HelmholtzSolver{T<:AbstractFloat}(isz::Array{Int,1},isx::Array{Int,1},ot::Array{T,1},vp::Array{T,2},wav::Array{T,1},fmin::T,fmax::T,nf::Int,nt::Int,dz::T,dx::T,dt::T,ext::Int=10,atten_max::T=1.,flag=2)
+function Helmholtz{T<:AbstractFloat}(isz::Array{Int,1},isx::Array{Int,1},ot::Array{T,1},vp::Array{T,2},wav::Array{T,1},fmin::T,fmax::T,nf::Int,nt::Int,dz::T,dx::T,dt::T,ext::Int=10,atten_max::T=1.,flag=2)
 
 # This function solves the acoustic Helmholtz equation for a prescribed
 # source wavelet and range of frequencies. A complex-numbered attenuating
@@ -27,7 +27,7 @@ function HelmholtzSolver{T<:AbstractFloat}(isz::Array{Int,1},isx::Array{Int,1},o
     nx = size(vp,2) + 2*ext
 
     L = Laplacian(nz,nx,dz,dx)
-    D = SlownessSquared(vp,nz,nx,ext) .* Attenuation(nz,nx,ext,atten_max)
+    M = MassMatrix(vp,nz,nx,ext) .* Attenuation(nz,nx,ext,atten_max)
 
     WAV = fft([wav;zeros(nf-length(wav))])
     fs = 1/dt
@@ -40,7 +40,7 @@ function HelmholtzSolver{T<:AbstractFloat}(isz::Array{Int,1},isx::Array{Int,1},o
     U = complex(zeros(nf,nz,nx))
     for iw = iwmin:iwmax
         w = waxis[iw]
-        H = L + w^2*D
+        H = L + w^2*M
         s = Source(isz,isx,ot,WAV,waxis,w,nz,nx,ext)
         U_tmp = H\s
         U_tmp = reshape(U_tmp,nz,nx)
@@ -60,7 +60,7 @@ end
 
 
 
-function HelmholtzSolver{T<:AbstractFloat}(isz::Int,isx::Int,ot::T,vp::Array{T,2},wav::Array{T,1},fmin::T,fmax::T,nf::Int,nt::Int,dz::T,dx::T,dt::T,ext::Int=10,atten_max::T=1.;flag=2)
+function Helmholtz{T<:AbstractFloat}(isz::Int,isx::Int,ot::T,vp::Array{T,2},wav::Array{T,1},fmin::T,fmax::T,nf::Int,nt::Int,dz::T,dx::T,dt::T,ext::Int=10,atten_max::T=1.;flag=2)
 
 # This function solves the acoustic Helmholtz equation for a prescribed
 # source wavelet and range of frequencies. A complex-numbered attenuating
@@ -93,7 +93,7 @@ function HelmholtzSolver{T<:AbstractFloat}(isz::Int,isx::Int,ot::T,vp::Array{T,2
     nx = size(vp,2) + 2*ext
 
     L = Laplacian(nz,nx,dz,dx)
-    D = SlownessSquared(vp,nz,nx,ext) .* Attenuation(nz,nx,ext,atten_max)
+    M = MassMatrix(vp,nz,nx,ext) .* Attenuation(nz,nx,ext,atten_max)
 
     WAV = fft([wav;zeros(nf-length(wav))])
     fs = 1/dt
@@ -106,7 +106,7 @@ function HelmholtzSolver{T<:AbstractFloat}(isz::Int,isx::Int,ot::T,vp::Array{T,2
     U = complex(zeros(nf,nz,nx))
     for iw = iwmin:iwmax
         w = waxis[iw]
-        H = L + w^2*D
+        H = L + w^2*M
         s = Source(isz,isx,ot,WAV,waxis,w,nz,nx,ext)
         U_tmp = H\s
         U_tmp = reshape(U_tmp,nz,nx)

@@ -40,8 +40,8 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
     ns = size(d,3)
 
     L = Laplacian(nz,nx,dz,dx)
+    M = MassMatrix(vp0,nz,nx,ext)
     A = Attenuation(nz,nx,ext,atten_max)
-    M = SlownessSquared(vp0,nz,nx,ext)
     R = Restriction(nz,nx,ext,igz,igx)
 
     D = fft([d ; zeros(nf-nt,ng,ns)],1)

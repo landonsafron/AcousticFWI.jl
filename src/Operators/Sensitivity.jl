@@ -4,7 +4,7 @@
 
     #### HOW TO INPUT SPARSE MATRICES INTO A FUNCTION WITH PREDEFINED TYPES???????
 
-
+#=
 function Sensitivity{T<:Complex}()
 
 # This function is the forward and adjoint sensitivity/jacobian operator
@@ -69,3 +69,4 @@ function Sensitivity{T<:Complex}(IN::Array{T,1},adj::Bool;R::Array{Int,2},H,U::A
     return OUT
 
 end
+=#
