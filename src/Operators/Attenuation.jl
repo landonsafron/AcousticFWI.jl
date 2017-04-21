@@ -1,8 +1,8 @@
 function Attenuation{T<:AbstractFloat}(nz::Int,nx::Int,ext::Int,atten_max::T)
 
-# This function builds a complex-valued diagonal matrix, where the elements
-# of the main diagonal contain the attenuation factor for each point in the
-# in the modeling region AND the surrounding boundary region. It is assumed 
+# This function builds the complex-valued diagonal attenuation operator/matrix,
+# where the main diagonal contains the attenuation factor for each point in
+# the modeling region AND the surrounding boundary region. It is assumed 
 # that no attenuation occurs in the modeling regionl. It is also assumed 
 # that all 4 sides of the modeling region are surrounded by an attenuating
 # boundary material to prevent boundary reflections. The imaginary component

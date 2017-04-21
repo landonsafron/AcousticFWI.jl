@@ -1,6 +1,6 @@
 function Restriction(nz::Int,nx::Int,ext::Int,igz::Array{Int,1},igx::Array{Int,1})
 
-# This function creates the reciver restriction/sampling operator. 
+# This function creates the reciver restriction/sampling operator/matrix. 
 #
 # INPUTS:     nz        - Number of grid points in the z-direction
 #             nx        - Number of grid points in the x-direction

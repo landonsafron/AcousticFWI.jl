@@ -1,8 +1,8 @@
 function MassMatrix{T<:AbstractFloat}(vp::Array{T,2},nz::Int,nx::Int,ext::Int)
 
-# This function builds the diagonal mass matrix, where the elements of the
-# main diagonal contain the slowness-squared (1 over velocity-squared) for
-# each point in the modeling region AND the surrounding boundary region.
+# This function builds the diagonal mass matrix/operator, where the elements
+# of the main diagonal contain the slowness-squared (1 over velocity-squared)
+# for each point in the modeling region AND the surrounding boundary region.
 #
 # INPUTS:     vp        - Acoustic velocity model
 #             nz        - Number of grid points in z-direction INCLUDING the absorbing boundary region

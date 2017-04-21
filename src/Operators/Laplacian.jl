@@ -1,7 +1,7 @@
 function Laplacian{T<:AbstractFloat}(nz::Int,nx::Int,dz::T,dx::T)
 
-# This function computes the 2D Laplace operator that acts on a vectorized
-# version of a 2D field. The vectorization is assumed to be done using column
+# This function computes the 2D Laplacian operator/matrix that acts on a
+# vectorized 2D field. The vectorization is assumed to be done using column
 # major order.
 #
 # INPUTS:     nz        - Number of grid points in the z-direction
