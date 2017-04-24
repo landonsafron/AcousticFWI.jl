@@ -1,4 +1,4 @@
-function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz::Array{Int,1},isx::Array{Int,1},igz::Array{Int,1},igx::Array{Int,1},ot::Array{T,1},fmin::T,fmax::T,nf::Int,dz::T,dx::T,dt::T,ext::Int=50,atten_max::T=2.,GNiter=5,CGiter=20,CGtol=1.0e-15)
+function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz::Array{Int,1},isx::Array{Int,1},igz::Array{Int,1},igx::Array{Int,1},ot::Array{T,1},fmin::T,fmax::T,nf::Int,dz::T,dx::T,dt::T,ext::Int=50,atten_max::T=2.,GNiter=5,CGiter=20,CGtol=1.0e-100)
 
 # This function performs frequency-domain acoustic full waveform inversion
 # using the Gauss-Newton method. A multi-scale approach is adopted by 
@@ -8,7 +8,13 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
 # and number of shots, respectively. It is assumed that each shot uses the
 # same array of receivers (receivers are not moved) and has the same duration
 # for the recording period. Additionally, it is assumed that each shot has 
-# the same source wavelet.
+# the same source wavelet. Full waveform inversion is performed for only a 
+# few selected frequencies falling between 'fmin' and 'fmax'; the frequencies
+# are selected using the scheme proposed by Sirgue and Pratt, 2004.
+#
+# REFERENCES: 1) Laurent Sirgue and R. Gerhard Pratt (2004), Efficient waveform
+#                inversion and imaging: A strategy for selecting temporal 
+#                frequencies.
 #
 # INPUTS:     vp0       - Initial guess for the velocity model
 #             d         - Data (time domain shot gathers) orgaized into a cube with dimensions nt,ng,ns
@@ -42,6 +48,7 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
     M = MassMatrix(vp0,nz,nx,ext)
     A = Attenuation(nz,nx,ext,atten_max)
     R = Restriction(nz,nx,ext,igz,igx)
+    param = Dict(:R=>R,:A=>A)
 
     D = fft([d ; zeros(nf-nt,ng,ns)],1)
     WAV = fft([wav;zeros(nf-length(wav))])
@@ -51,11 +58,21 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
     waxis = 2*pi*faxis
 
     _,iwmin = findmin(abs(fmin-faxis))
-    _,iwmax = findmin(abs(fmax-faxis))
 
-    param = Dict(:R=>R,:A=>A)
+    zmax = dz*(nz-2*ext)
+    hmax = 0.5*maximum(dx*(kron(isx,ones(Int,ng)) - kron(ones(Int,ns),igx)))
+    alpha = 1/sqrt(1 + (hmax/zmax)^2)
+    f_inv = faxis[iwmin]
+    w_inv = [waxis[iwmin]]
+    iw_inv = [iwmin]
+    while f_inv/alpha <= fmax
+        f_inv = f_inv/alpha
+        _,iw = findmin(abs(f_inv-faxis))
+        push!(w_inv,2*pi*f_inv)
+        push!(iw_inv,iw)
+    end
 
-    for iw = iwmin:iwmax
+    for iw in iw_inv
         w = waxis[iw]
         s = zeros(eltype(D),nz*nx,ns)
         for ishot = 1:ns
@@ -72,8 +89,8 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
             param[:H] = H
             param[:U] = U
             param[:w] = w
-            dM = ConjugateGradients(r,[SensitivityMultiShot],param,Niter=CGiter,mu=0.,tol=CGtol)
-            M -= dM # or should it be += ....?????
+            dM,cost = ConjugateGradients(r,[SensitivityMultiShot],[param],Niter=CGiter,mu=0.,tol=CGtol)
+            M -= spdiagm(real(dM))
         end
     end
 
@@ -82,7 +99,3 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
     return vp
 
 end
-
-
-#g = real(SensitivityMultiShot(r,true;param...))
-#imshow(reshape(g,nz,nx))

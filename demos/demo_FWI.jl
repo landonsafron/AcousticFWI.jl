@@ -2,7 +2,7 @@ using AcousticFWI,Seismic,PyPlot
 
 #function main()
 
-    ns = 10
+    ns = 5  # ns = 10
     ng = 250
     nz = 150
     nx = 250
@@ -12,11 +12,11 @@ using AcousticFWI,Seismic,PyPlot
     dx = 0.01
     dt = 0.002
     f0 = 10.
-    fmin = 0.5 
+    fmin = 1. 
     fmax = 30.
     ext = 50
     atten_max = 2.5
-    GNiter = 10
+    GNiter = 4
     CGiter = 20
 
     vp = 2.1*ones(nz,nx)
