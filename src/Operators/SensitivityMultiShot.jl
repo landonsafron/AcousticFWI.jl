@@ -55,7 +55,7 @@ function Sensitivity1Shot{T1<:Complex,T2<:Int,T3<:AbstractFloat}(IN::Array{T1,1}
 # OUTPUTS:    OUT       - Model perturbation for adjoint; Data residual for forward
 
     if adj==false
-        OUT = -w^2*R*H\(spdiagm(U)*A*IN)
+        OUT = -w^2*R*(H\(spdiagm(U)*A*IN))
     end
 
     if adj==true
