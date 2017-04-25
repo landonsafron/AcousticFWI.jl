@@ -36,7 +36,7 @@ function main()
 
     vp0 = 2.5*ones(vp)
 
-    ## Perform 1 iteration of FWI to check if the Sensitivity operator passes the dot-product test
+    # Perform 1 iteration of FWI to check if the Sensitivity operator passes the dot-product test
     
     nz = size(vp0,1) + 2*ext
     nx = size(vp0,2) + 2*ext
@@ -81,7 +81,7 @@ function main()
     R = SensitivityMultiShot(m,false;param...)
     M = SensitivityMultiShot(r,true;param...)
 
-    dotprodtest = dot(m[:],M[:]) - dot(r[:],R[:])
+    dotprodtest = (m[:]'*M[:])[1] - (r[:]'*R[:])[1]
     println("This number should be close to zero: ",dotprodtest)
 
 end

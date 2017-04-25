@@ -1,8 +1,8 @@
 using AcousticFWI,Seismic,PyPlot
 
-#function main()
+function main()
 
-    ns = 5  # ns = 10
+    ns = 10
     ng = 250
     nz = 150
     nx = 250
@@ -16,7 +16,7 @@ using AcousticFWI,Seismic,PyPlot
     fmax = 30.
     ext = 50
     atten_max = 2.5
-    GNiter = 4
+    GNiter = 10
     CGiter = 20
 
     vp = 2.1*ones(nz,nx)
@@ -37,24 +37,27 @@ using AcousticFWI,Seismic,PyPlot
     end
 
     vp0 = 2.5*ones(vp)
-    vp_est = FWI(vp0,d,wav,isz,isx,igz,igx,ot,fmin,fmax,nf,dz,dx,dt,ext,atten_max,GCiter,CGiter)
+    vp_est = FWI(vp0,d,wav,isz,isx,igz,igx,ot,fmin,fmax,nf,dz,dx,dt,ext,atten_max,GNiter,CGiter)
 
-    subplot(3,3,1) ; SeisPlot(u[10,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,2) ; SeisPlot(u[70,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,3) ; SeisPlot(u[130,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,4) ; SeisPlot(u[190,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,5) ; SeisPlot(u[250,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,6) ; SeisPlot(u[310,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,7) ; SeisPlot(u[370,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,8) ; SeisPlot(u[430,:,:],pclip=100,cmap="gray",fignum=1)
-    subplot(3,3,9) ; SeisPlot(u[490,:,:],pclip=100,cmap="gray",fignum=1)
+    figure(1) ; vmin = 1000*min(minimum(vp),minimum(vp0),minimum(vp_est))
+              ; vmax = 1000*max(maximum(vp),maximum(vp0),maximum(vp_est))
+              ; subplot(311) ; imshow(1000*vp,vmin=vmin,vmax=vmax,cmap="YlOrBr",extent=[0.,(nx-1)*1000*dx,(nz-1)*1000*dz,0.])
+                             ; xlabel("x (m)")
+                             ; ylabel("z (m)")
+                             ; colorbar(aspect=15,ticks=[2100,2300,2500,2700,2900,3100])
+                             ; ax = gca() 
+                             ; ax[:text](-600.,-100., "a)", fontsize=15, fontweight="bold")
+              ; subplot(312) ; imshow(1000*vp0,vmin=vmin,vmax=vmax,cmap="YlOrBr",extent=[0.,(nx-1)*1000*dx,(nz-1)*1000*dz,0.])
+                             ; xlabel("x (m)")
+                             ; ylabel("z (m)")
+                             ; colorbar(aspect=15,ticks=[2100,2300,2500,2700,2900,3100])
+                             ; ax = gca() 
+                             ; ax[:text](-600.,-100., "b)", fontsize=15, fontweight="bold")
+              ; subplot(313) ; imshow(1000*vp_est,vmin=vmin,vmax=vmax,cmap="YlOrBr",extent=[0.,(nx-1)*1000*dx,(nz-1)*1000*dz,0.])
+                             ; xlabel("x (m)")
+                             ; ylabel("z (m)")
+                             ; colorbar(aspect=15,ticks=[2100,2300,2500,2700,2900,3100])
+                             ; ax = gca() 
+                             ; ax[:text](-600.,-100., "c)", fontsize=15, fontweight="bold")
 
-    SeisPlot(d,pclip=98,cmap="gray",fignum=2)
-
-    figure(3) ; vmin = min(minimum(vp),minimum(vp0),minimum(vp_est))
-              ; vmax = max(maximum(vp),maximum(vp0),maximum(vp_est))
-              ; subplot(311) ; imshow(vp,vmin=vmin,vmax=vmax,cmap="YlOrBr",extent=[0.,(nx-1)*dx,(nz-1)*dz,0.])
-              ; subplot(312) ; imshow(vp0,vmin=vmin,vmax=vmax,cmap="YlOrBr",extent=[0.,(nx-1)*dx,(nz-1)*dz,0.])
-              ; subplot(313) ; imshow(vp_est,vmin=vmin,vmax=vmax,cmap="YlOrBr",extent=[0.,(nx-1)*dx,(nz-1)*dz,0.])
-
-#end
+end
