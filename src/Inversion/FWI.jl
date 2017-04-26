@@ -37,6 +37,8 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
 #             CGtol     - Convergence tolerance for conjugate gradients
 #
 # OUTPUTS:    vp        - Estimated velocity model
+#             cost      - Normalized cost function at each iteration (for each frequency)
+#             f_inv     - A list of the frequencies that FWI was performed for
 
     nz = size(vp0,1) + 2*ext
     nx = size(vp0,2) + 2*ext
@@ -51,28 +53,30 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
     param = Dict(:R=>R,:A=>A)
 
     D = fft([d ; zeros(nf-nt,ng,ns)],1)
-    WAV = fft([wav;zeros(nf-length(wav))])
+    WAV = fft([wav ; zeros(nf-length(wav))])
     fs = 1/dt
     df = fs/nf
     faxis = fftshift(-fs/2:df:fs/2-df)
     waxis = 2*pi*faxis
 
-    _,iwmin = findmin(abs(fmin-faxis))
-
     zmax = dz*(nz-2*ext)
     hmax = 0.5*maximum(dx*(kron(isx,ones(Int,ng)) - kron(ones(Int,ns),igx)))
     alpha = 1/sqrt(1 + (hmax/zmax)^2)
-    f_inv = faxis[iwmin]
+
+    _,iwmin = findmin(abs(fmin-faxis))
+    f_inv = [faxis[iwmin]]
     w_inv = [waxis[iwmin]]
     iw_inv = [iwmin]
-    while f_inv/alpha <= fmax
-        f_inv = f_inv/alpha
-        _,iw = findmin(abs(f_inv-faxis))
-        push!(w_inv,2*pi*f_inv)
+    while f_inv[end]/alpha <= fmax
+        _,iw = findmin(abs(f_inv[end]/alpha-faxis))
+        push!(f_inv,f_inv[end]/alpha)
+        push!(w_inv,2*pi*f_inv[end])
         push!(iw_inv,iw)
     end
 
+    cost = Array{Float64}[]
     for iw in iw_inv
+        COST = Float64[]
         w = waxis[iw]
         s = zeros(eltype(D),nz*nx,ns)
         for ishot = 1:ns
@@ -89,13 +93,15 @@ function FWI{T<:AbstractFloat}(vp0::Array{T,2},d::Array{T,3},wav::Array{T,1},isz
             param[:H] = H
             param[:U] = U
             param[:w] = w
-            dM,cost = ConjugateGradients(r,[SensitivityMultiShot],[param],Niter=CGiter,mu=0.,tol=CGtol)
+            dM,_ = ConjugateGradients(r,[SensitivityMultiShot],[param],Niter=CGiter,mu=0.,tol=CGtol)
             M -= spdiagm(real(dM))
+            push!(COST,norm(r))
         end
+        push!(cost,COST/COST[1])
     end
 
     vp = reshape(sqrt(1./diag(M)),nz,nx)[ext+1:end-ext,ext+1:end-ext]
 
-    return vp
+    return vp,cost,f_inv
 
 end
